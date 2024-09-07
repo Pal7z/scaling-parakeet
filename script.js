@@ -28,38 +28,48 @@ function isSafe(board, row, col, n) {
   return true;
 }
 
-function solveNQUtil(board, col, n) {
-  if (col >= n) return true;
+function solveNQUtil(board, col, n, solutions) {
+  if (col >= n) {
+    solutions.push(board.map(row => [...row])); // Clone board state
+    return;
+  }
 
   for (let i = 0; i < n; i++) {
     if (isSafe(board, i, col, n)) {
       board[i][col] = 1;
-      if (solveNQUtil(board, col + 1, n)) return true;
+      solveNQUtil(board, col + 1, n, solutions);
       board[i][col] = 0;
     }
   }
-  return false;
 }
 
 function solveNQueens() {
   const n = parseInt(document.getElementById('n-value').value);
   const board = Array.from({ length: n }, () => Array(n).fill(0));
+  const solutions = [];
 
-  if (solveNQUtil(board, 0, n)) {
+  solveNQUtil(board, 0, n, solutions);
+
+  if (solutions.length > 0) {
     createChessboard(n);
-    renderQueens(board, n);
+    animateSolutions(solutions[0], n); // Use the first solution
   } else {
     alert("No solution exists for N = " + n);
   }
 }
 
-function renderQueens(board, n) {
+function animateSolutions(board, n) {
   const cells = document.querySelectorAll('.cell');
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      if (board[i][j] === 1) {
-        cells[i * n + j].classList.add('queen');
+  cells.forEach(cell => cell.classList.remove('queen', 'queen-animation'));
+
+  setTimeout(() => {
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        if (board[i][j] === 1) {
+          const cell = cells[i * n + j];
+          cell.classList.add('queen', 'queen-animation');
+        }
       }
     }
-  }
+  }, 100); // Delay to ensure chessboard is rendered before animation
 }
